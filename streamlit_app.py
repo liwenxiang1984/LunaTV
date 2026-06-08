@@ -1,65 +1,63 @@
+# streamlit_app.py — Streamlit Community Cloud 部署入口
 import streamlit as st
+import sys
+import os
 
-LUNATV_REPO = "https://github.com/liwenxiang1984/LunaTV"
-DEPLOYED_LUNATV_URL = "https://your-lunatv-instance.example.com"  # 改成你自己的 LunaTV 部署地址
+# 将项目根目录加入 Python 路径，确保可导入其他模块
+sys.path.insert(0, os.path.dirname(__file__))
 
+# ======================================================
+# 页面基础配置（必须是第一个 Streamlit 调用）
+# ======================================================
 st.set_page_config(
-    page_title="LunaTV Launcher",
+    page_title="LunaTV",
     page_icon="📺",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-st.title("📺 LunaTV on Streamlit")
-st.caption("这是一个用于 Streamlit Cloud 的 LunaTV 导航与说明页面，不是原生 LunaTV 运行环境。")
+# ======================================================
+# 如果 LunaTV 主逻辑在独立文件中，用以下方式引入：
+# 方式 A：直接导入主模块（推荐）
+# ======================================================
+# from luna_tv import main  # 替换为实际模块名
+# main()
 
-st.warning(
-    "LunaTV 是 Next.js 项目，不能直接作为 Streamlit 应用运行在 share.streamlit.io / streamlit.app。"
-)
+# ======================================================
+# 方式 B：如果原项目入口是 main.py 或 app.py，
+# 用 exec 动态执行（兼容性最强）
+# ======================================================
+# with open("main.py", "r", encoding="utf-8") as f:
+#     exec(f.read())
 
-col1, col2 = st.columns(2)
+# ======================================================
+# 方式 C：如果 LunaTV 已经是 streamlit 脚本，
+# 直接在此文件内写完整逻辑或复制粘贴过来
+# ======================================================
 
-with col1:
-    st.subheader("项目仓库")
-    st.markdown(f"[打开 LunaTV GitHub 仓库]({LUNATV_REPO})")
+# --- 示例：LunaTV 应用框架 ---
+def main():
+    st.title("🌙 LunaTV")
+    st.markdown("---")
 
-with col2:
-    st.subheader("在线实例")
-    st.markdown(f"[打开已部署的 LunaTV 实例]({DEPLOYED_LUNATV_URL})")
+    # 侧边栏
+    with st.sidebar:
+        st.header("频道列表")
+        channel = st.selectbox(
+            "选择频道",
+            options=["直播频道 1", "直播频道 2", "点播内容"],
+        )
+        st.info("由 LunaTV 提供支持")
 
-st.divider()
+    # 主内容区
+    st.subheader(f"当前：{channel}")
 
-st.subheader("部署说明")
-st.markdown(
-    """
-1. 把这个 `streamlit_app.py` 上传到你自己的 GitHub 仓库根目录。  
-2. 在 Streamlit Community Cloud 里选择该仓库。  
-3. Main file path 填 `streamlit_app.py`。  
-4. 点击 Deploy。  
-5. 如果你要真正运行 LunaTV，请把 LunaTV 部署到支持 Next.js 的平台，再把地址填到 `DEPLOYED_LUNATV_URL`。  
-"""
-)
+    # 如需播放 M3U8/RTMP 流，可嵌入 HTML 播放器
+    video_url = st.text_input("输入视频/直播流地址（M3U8 / MP4）", placeholder="https://...")
+    if video_url:
+        st.video(video_url)
+    else:
+        st.info("请在左侧选择频道或手动输入流媒体地址")
 
-st.divider()
-
-st.subheader("为什么不能直接运行原项目")
-st.code(
-    """LunaTV -> Next.js / TypeScript / Tailwind
-Streamlit Cloud -> Python / streamlit_app.py""",
-    language="text"
-)
-
-st.info(
-    "如果你已经有可访问的 LunaTV 网址，这个页面可以作为入口页、说明页或书签页来使用。"
-)
-
-with st.expander("可选：显示在线实例（若目标站点允许 iframe）"):
-    st.write("部分站点会禁止被 iframe 嵌入；如果打不开，使用上方链接直接访问。")
-    iframe_html = f'''
-    <iframe
-        src="{DEPLOYED_LUNATV_URL}"
-        width="100%"
-        height="900"
-        style="border:1px solid #ddd; border-radius:12px;"
-    ></iframe>
-    '''
-    st.components.v1.html(iframe_html, height=920, scrolling=True)
+if __name__ == "__main__" or True:
+    main()
